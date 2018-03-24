@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Placements Interview Project</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqgrid/4.6.0/css/ui.jqgrid.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
+<link rel="stylesheet" type="text/css" media="screen" href="http://www.guriddo.net/demo/css/trirand/ui.jqgrid-bootstrap.css" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqgrid/4.6.0/js/i18n/grid.locale-en.js"></script>
+<script src="jquery.jqGrid.min.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jqgrid/4.6.0/js/jquery.jqGrid.min.js"></script>  -->
+<script>
+	//$.jgrid.defaults.width = 900;
+</script>
+</head>
+<body>
+	<div id="menu"></div>
+	<div class="container">
+
+		<div class="input-append">
+			<input class="col-lg-4" id="share" type="text" />
+			<button id="btnshare" type="button">Share</button>
+		</div>
+		<br/>
+		<h3>Item List</h3>
+    		<span>Campaign Filter&nbsp;&nbsp;&nbsp;&nbsp;</span>
+		<div class="input-append">
+			<input class="col-lg-4" id="campaign" type="text" />
+			<button id="btnfind" type="button">Find</button>
+		</div>
+		<div>
+		    <table id="grid_item"></table>
+		    <div id="grid_item_pager"></div>
+			<button id="export">Export to CSV</button>
+		</div>
+		<div>
+			<h4>Comment</h4>
+			<div class="input-append">
+				<input class="col-lg-4" id="new_comment" type="text"/>
+				<button id="btncomment" type="button">Add</button>
+			</div>
+		    <table id="grid_comment"></table>
+		</div>
+	</div>
+</body>
+<script>
+	var minrate = 0;
+	var selected_item_id = -1;
+	function getParam(param)
+	{
+	    var vars = [], hash;
+	    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+	    for(var i = 0; i < hashes.length; i++)
+	    {
+	        hash = hashes[i].split('=');
+	        vars.push(hash[0]);
+	        vars[hash[0]] = hash[1];
+	    }
+	    if(!vars[param]) return vars[param];
+	    return "";
+	}
+	function htmlEncode(value){
+		return value.replace(/\ /g, '%20');
+	}
+	function htmlDecode(value){
+		return value.replace(/\%20/g, ' ');
+	}	
+	var filter = getParam("filter");
+	function getUrl() {
+		return 'item/list?filter=' + filter;
+	}
+	$(function() {
+		$("#menu").load("menu.html");
+		
+		//share
+	    $("#share").val(window.location.href);
+	    $('#btnshare').click(function() {
+	    		$("#share").select();
+	    		document.execCommand("Copy");
+	    		alert("share link copied");
+		});
+		
+	    //filter
+		$("#campaign").val(htmlDecode(filter));
+		$('#btnfind').click(function() {
+			filter = htmlEncode($("#campaign").val());
+		    $("#grid_item").jqGrid().setGridParam({ url : getUrl() }).trigger("reloadGrid");
+		    
+		    var url_base = window.location.href.slice(0, window.location.href.indexOf('?'));
+		    $("#share").val(url_base + "?" + filter);
+		});
+		
+		//item grid
+		$("#grid_item").jqGrid({
+            url: getUrl(),
+            mtype: "GET",
+            datatype: "json",
+            colModel: [
+                { label: 'id', name: 'id', key: true, width: 50, sortable:false },
+             //   { label: 'Campaign Id', name: 'campaign_id', width: 50, sortable:false },
+                { label: 'Campaign Name', name: 'campaign_name', width: 250, sortable:false },
+                { label: 'Line Item Name', name: 'line_item_name', width: 400, sortable:false },
+                { label: 'Booked Amount', name: 'booked_amount', width: 250, sortable:false, align: 'right' },
+                { label: 'Actual Amount', name: 'actual_amount', width: 250, sortable:false, align: 'right' },
+                { label: 'Adjustments', name: 'adjustments', width: 250, sortable:false, align: 'right' }
+            ],
+            sort:false,
+			page: 1,
+            width: 780,
+            height: 250,
+            rowNum: 20,
+            pager: "#grid_item_pager",
+           	grouping:true,
+           	groupingView : {
+           		groupField : ['campaign_name'],
+           		groupColumnShow : [false]
+           	},
+           	onSelectRow: function(id){ 
+	    		    //$("#grid_history").jqGrid().setGridParam({ url : 'item/history/'+id }).jqGrid("clearGridData", true).trigger("reloadGrid");
+	    		    $("#grid_comment").jqGrid().setGridParam({ url : 'item/comment/'+id }).jqGrid("clearGridData", true).trigger("reloadGrid");
+	    		    selected_item_id = id;
+        		}            
+        });
+		//csv export
+		$("#export").on("click", function(){
+			$("#grid_item").jqGrid("exportToCsv",{
+				separator: ",",
+				separatorReplace : "", // in order to interpret numbers
+				quote : '"', 
+				escquote : '"', 
+				newLine : "\r\n", // navigator.userAgent.match(/Windows/) ?	'\r\n' : '\n';
+				replaceNewLine : " ",
+				includeCaption : true,
+				includeLabels : true,
+				includeGroupHeader : true,
+				includeFooter: true,
+				fileName : "grid_item.csv",
+				returnAsString : false
+			})
+		});
+			
+		//comment
+	    $('#btncomment').click(function() {
+			if($("#new_comment").val() == '') return;
+			if(btncomment < 0) {
+				alert('select item first');
+				return;
+			}
+		    $.get( 'item/comment/'+selected_item_id+'/'+$("#new_comment").val(), function( data ) {
+		    		$("#grid_comment").jqGrid().setGridParam({ url : 'item/comment/'+selected_item_id }).trigger("reloadGrid");
+		    	});
+		    $("#new_comment").val("");
+		});		
+		$("#grid_comment").jqGrid({
+            mtype: "GET",
+            datatype: "json",
+            colModel: [
+                { label: 'Comment', name: 'comment', width: 420, sortable:false },
+            ],
+            width: 420,
+            height: 100
+        });		
+		$("#grid_comment").parents("div.ui-jqgrid-view").children("div.ui-jqgrid-hdiv").hide();
+    });
+	
+</script>
+</html>

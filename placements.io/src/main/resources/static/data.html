@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Rover Interview Project</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/css/bootstrap-slider.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.min.js"></script>
+</head>
+<body>
+    <div id="menu"></div>
+
+	<h3>Data Management</h3>
+	
+	<button id="import" class="btn btn-primary" type="button">
+		<span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+		Import Json
+	</button>
+	<button id="remove" class="btn btn-primary" type="button">
+		<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+		Remove All Data
+	</button>
+
+</body>
+<script type="text/javascript">
+	$(function() {
+		$("#menu").load("menu.html");
+
+		$('#import').click(function() {
+			if (confirm('Are you sure you want to import ')) {
+				$.ajax({
+					url : 'data/import',
+					success : function(data) {
+						alert(data);
+					}
+				});
+			}
+		});
+		$('#remove').click(function() {
+			if (confirm('Are you sure you want to remove all data?')) {
+				$.ajax({
+					url : 'data/init',
+					success : function(data) {
+						alert(data);
+					}
+				});
+			}
+		});
+	});
+</script>
+</html>
