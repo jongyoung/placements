@@ -1,7 +1,7 @@
 # Placements.io Coding Project By Jong young Chung
 
 ## Project Platform
-I chosed HTML(client), Spring Boot(WAS) and H2(database). Because those are platform independent, easy to deploy and easy to set up.
+I chosed HTML(client), Spring Boot(WAS) and H2(database), because those are platform independent, easy to deploy and easy to set up.
 
 ## Selected Requirements
 These features are simple, but it could show the entire client server flow clearly.
@@ -42,7 +42,7 @@ Time space trade-offs.
 http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
 
 1. Run Server
-$ java -jar ./build/libs/placements.io-0.0.1-SNAPSHOT.jar
+$ java -jar ./placements.io-0.0.1-SNAPSHOT.jar
 
 2. Run Client
 http://localhost:8080/list.html
